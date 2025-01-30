@@ -2,39 +2,47 @@
 #include <stdlib.h>
 #include "bd_paciente.h"
 #include "menu.h"
-
-BDPaciente* bd;
+#include "utils.h"
 
 int main() {
-    bd = criar_bd();
-    if (!bd) {
-        fprintf(stderr, "Erro ao criar banco de dados\n");
+    BDPaciente* bd = criar_bd();
+    if (!bd || carregar_bd(bd) != 0) {
+        printf("Erro ao inicializar o banco de dados!\n");
         return 1;
     }
-
-    carregar_csv(bd, "bd_paciente.csv");
 
     char opcao;
     do {
         exibir_menu();
-        printf("Escolha uma opção: ");
         scanf(" %c", &opcao);
+        limpar_buffer();
 
-        if (opcao == 'Q' || opcao == 'q') {
-            break;
+        switch (opcao) {
+            case '1':
+                consultar_paciente(bd);
+                break;
+            case '2':
+                atualizar_paciente(bd);
+                break;
+            case '3':
+                remover_paciente(bd);
+                break;
+            case '4':
+                inserir_paciente(bd);
+                break;
+            case '5':
+                imprimir_pacientes(bd);
+                break;
+            case 'Q':
+            case 'q':
+                printf("Salvando dados e encerrando...\n");
+                salvar_bd(bd);
+                break;
+            default:
+                printf("Opção inválida!\n");
         }
+    } while (opcao != 'Q' && opcao != 'q');
 
-        int opcao_num = opcao - '0';
-        if (opcao_num >= 1 && opcao_num <= 6) {
-            processar_opcao(opcao_num);
-        } else {
-            printf("Opção inválida!\n");
-        }
-
-    } while (1);
-
-    salvar_csv(bd, "bd_paciente.csv");
     liberar_bd(bd);
-
     return 0;
 }

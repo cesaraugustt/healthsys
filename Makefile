@@ -1,48 +1,29 @@
-# Compilador
-CC = gcc
+CC=gcc
+CFLAGS=-Wall -Wextra -g
+OBJS=main.o paciente.o lista.o bd_paciente.o utils.o menu.o
 
-# Flags de compilação
-CFLAGS = -Wall -Wextra -std=c99 -g
+all: healthsys
 
-# Nome do executável
-TARGET = healthsys
+healthsys: $(OBJS)
+	$(CC) $(OBJS) -o healthsys
 
-# Diretórios
-SRC_DIR = src
-DATA_DIR = data
-OBJ_DIR = obj
-BIN_DIR = bin
+main.o: main.c bd_paciente.h menu.h utils.h
+	$(CC) $(CFLAGS) -c main.c
 
-# Arquivos fonte
-SRCS = $(wildcard $(SRC_DIR)/*.c)
+menu.o: menu.c menu.h bd_paciente.h utils.h
+	$(CC) $(CFLAGS) -c menu.c
 
-# Arquivos objeto (gerados a partir dos arquivos fonte)
-OBJS = $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(SRCS))
+paciente.o: paciente.c paciente.h
+	$(CC) $(CFLAGS) -c paciente.c
 
-# Regra padrão: compila o programa
-all: $(BIN_DIR)/$(TARGET)
+lista.o: lista.c lista.h paciente.h
+	$(CC) $(CFLAGS) -c lista.c
 
-# Regra para compilar o executável
-$(BIN_DIR)/$(TARGET): $(OBJS)
-	@mkdir -p $(BIN_DIR)  # Cria o diretório bin se não existir
-	$(CC) $(CFLAGS) -o $@ $(OBJS)
+bd_paciente.o: bd_paciente.c bd_paciente.h lista.h
+	$(CC) $(CFLAGS) -c bd_paciente.c
 
-# Regra para compilar cada arquivo objeto
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
-	@mkdir -p $(OBJ_DIR)  # Cria o diretório obj se não existir
-	$(CC) $(CFLAGS) -c $< -o $@
+utils.o: utils.c utils.h
+	$(CC) $(CFLAGS) -c utils.c
 
-# Regra para limpar os arquivos gerados
 clean:
-	rm -rf $(OBJ_DIR) $(BIN_DIR)
-
-# Regra para rodar o programa
-run: $(BIN_DIR)/$(TARGET)
-	./$(BIN_DIR)/$(TARGET)
-
-# Regra para depuração (usando gdb)
-debug: $(BIN_DIR)/$(TARGET)
-	gdb ./$(BIN_DIR)/$(TARGET)
-
-# Indica que 'clean', 'run' e 'debug' não são arquivos
-.PHONY: all clean run debug
+	rm -f *.o healthsys
