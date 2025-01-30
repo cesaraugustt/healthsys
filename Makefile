@@ -1,29 +1,33 @@
+# Compilador e flags
 CC=gcc
-CFLAGS=-Wall -Wextra -g
-OBJS=main.o paciente.o lista.o bd_paciente.o utils.o menu.o
+CFLAGS=-Wall -Wextra -g -std=c99
 
-all: healthsys
+# Diretórios
+SRC_DIR=src
+OBJ_DIR=obj
 
-healthsys: $(OBJS)
-	$(CC) $(OBJS) -o healthsys
+# Lista de objetos com caminho correto
+OBJS=$(OBJ_DIR)/main.o $(OBJ_DIR)/paciente.o $(OBJ_DIR)/lista.o $(OBJ_DIR)/bd_paciente.o $(OBJ_DIR)/utils.o $(OBJ_DIR)/menu.o
 
-main.o: main.c bd_paciente.h menu.h utils.h
-	$(CC) $(CFLAGS) -c main.c
+# Nome do executável
+TARGET=healthsys
 
-menu.o: menu.c menu.h bd_paciente.h utils.h
-	$(CC) $(CFLAGS) -c menu.c
+# Regra principal
+all: $(TARGET)
 
-paciente.o: paciente.c paciente.h
-	$(CC) $(CFLAGS) -c paciente.c
+# Gera o executável
+$(TARGET): $(OBJS)
+	$(CC) $(OBJS) -o $(TARGET)
 
-lista.o: lista.c lista.h paciente.h
-	$(CC) $(CFLAGS) -c lista.c
+# Regra genérica para compilar arquivos .c para .o
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
+	mkdir -p $(OBJ_DIR)  # Cria o diretório se não existir
+	$(CC) $(CFLAGS) -c $< -o $@
 
-bd_paciente.o: bd_paciente.c bd_paciente.h lista.h
-	$(CC) $(CFLAGS) -c bd_paciente.c
-
-utils.o: utils.c utils.h
-	$(CC) $(CFLAGS) -c utils.c
-
+# Limpeza dos arquivos compilados
 clean:
-	rm -f *.o healthsys
+	rm -rf $(OBJ_DIR)/*.o $(TARGET)
+
+# Regra para rodar o programa
+run: $(TARGET)
+	./$(TARGET)

@@ -52,7 +52,7 @@ Node* buscar_paciente_por_nome(Lista* lista, const char* nome) {
     
     Node* atual = lista->inicio;
     while (atual != NULL) {
-        if (strcmp(atual->paciente.nome, nome) != NULL) {
+        if (strstr(atual->paciente.nome, nome) != 0) {
             return atual;
         }
         atual = atual->prox;

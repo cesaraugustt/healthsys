@@ -83,7 +83,7 @@ void atualizar_paciente(BDPaciente* bd) {
     printf("\nDigite o novo valor para os campos (ou '-' para manter o valor atual):\n");
     
     char cpf[15], nome[100], data[11];
-    int idade;
+    // int idade;
 
     printf("CPF atual: %s\nNovo CPF (xxx.xxx.xxx-xx): ", atual->paciente.cpf);
     fgets(cpf, sizeof(cpf), stdin);

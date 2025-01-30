@@ -7,7 +7,11 @@ BDPaciente* criar_bd() {
     BDPaciente* bd = (BDPaciente*)malloc(sizeof(BDPaciente));
     if (bd != NULL) {
         bd->lista = criar_lista();
-        bd->arquivo = strdup(ARQUIVO_BD);
+        // bd->arquivo = strdup(ARQUIVO_BD);
+        bd->arquivo = malloc(strlen(ARQUIVO_BD) + 1);
+        if (bd->arquivo != NULL) {
+            strcpy(bd->arquivo, ARQUIVO_BD);
+        }
         if (bd->lista == NULL || bd->arquivo == NULL) {
             liberar_bd(bd);
             return NULL;
