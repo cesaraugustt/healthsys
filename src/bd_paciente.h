@@ -1,19 +1,26 @@
 #ifndef BD_PACIENTE_H
 #define BD_PACIENTE_H
 
-#include "lista.h"
+#include "paciente.h"
 
-#define ARQUIVO_BD "bd_paciente.csv"
+typedef struct Node {
+    Paciente* paciente;
+    struct Node* proximo;
+} Node;
 
 typedef struct {
-    Lista* lista;
-    char* arquivo;
-} BD_Paciente;
+    Node* inicio;
+    int proximo_id;
+} BDPaciente;
 
-// Funções para manipulação do banco de dados
-BD_Paciente* criar_bd();
-int carregar_bd(BD_Paciente* bd);
-int salvar_bd(BD_Paciente* bd);
-void liberar_bd(BD_Paciente* bd);
+BDPaciente* criar_bd();
+void liberar_bd(BDPaciente* bd);
+void carregar_csv(BDPaciente* bd, const char* arquivo);
+void salvar_csv(BDPaciente* bd, const char* arquivo);
+void inserir_csv(BDPaciente* bd, Paciente* paciente);
+Paciente* buscar_paciente_por_cpf(const BDPaciente* bd, const char* cpf);
+Paciente* buscar_paciente_por_nome(const BDPaciente* bd, const char* nome);
+void remover_paciente(BDPaciente* bd, int id);
+void imprimir_todos_pacientes(const BDPaciente* bd);
 
 #endif
