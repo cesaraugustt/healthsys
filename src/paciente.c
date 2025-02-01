@@ -3,35 +3,45 @@
 #include <string.h>
 #include "paciente.h"
 
-Paciente* criar_paciente(int id, const char* cpf, const char* nome, int idade,
-const char* data_cadastro) {
-    Paciente* paciente = (Paciente*)malloc(sizeof(Paciente));
-    if (paciente == NULL) {
-        return NULL;
+// Função para criar um novo paciente
+Paciente* criar_paciente(int id, const char* cpf, const char* nome, int idade, const char* data_cadastro) {
+    // Aloca memória para o paciente
+    Paciente* novo_paciente = (Paciente*)malloc(sizeof(Paciente));
+    if (novo_paciente == NULL) {
+        fprintf(stderr, "Erro ao alocar memória para o paciente.\n");
+        exit(EXIT_FAILURE);
     }
 
-    paciente->id = id;
-    strncpy(paciente->cpf, cpf, sizeof(paciente->cpf) - 1);
-    paciente->cpf[sizeof(paciente->cpf) - 1] = '\0';
-    
-    strncpy(paciente->nome, nome, sizeof(paciente->nome) - 1);
-    paciente->nome[sizeof(paciente->nome) - 1] = '\0';
-    
-    paciente->idade = idade;
-    
-    strncpy(paciente->data_cadastro, data_cadastro, sizeof(paciente->data_cadastro) - 1);
-    paciente->data_cadastro[sizeof(paciente->data_cadastro) - 1] = '\0';
-    
-    return paciente;
+    // Preenche os campos do paciente
+    novo_paciente->id = id;
+    strncpy(novo_paciente->cpf, cpf, 14); // CPF com pontuação (14 caracteres + '\0')
+    novo_paciente->cpf[14] = '\0';        // Garante que o CPF está terminado com '\0'
+    strncpy(novo_paciente->nome, nome, 99);
+    novo_paciente->nome[99] = '\0';       // Garante que o nome está terminado com '\0'
+    novo_paciente->idade = idade;
+    strncpy(novo_paciente->data_cadastro, data_cadastro, 10);
+    novo_paciente->data_cadastro[10] = '\0'; // Garante que a data está terminada com '\0'
+
+    return novo_paciente;
 }
 
-void imprimir_paciente(const Paciente* paciente) {
-    if (paciente != NULL) {
-        printf("ID: %d, CPF: %s, Nome: %s, Idade: %d, Data Cadastro: %s\n",
-           paciente->id, paciente->cpf, paciente->nome, paciente->idade, paciente->data_cadastro);
-    }
-}
-
+// Função para liberar a memória alocada para um paciente
 void liberar_paciente(Paciente* paciente) {
-    free(paciente);
+    if (paciente != NULL) {
+        free(paciente);
+    }
+}
+
+// Função para imprimir os dados de um paciente
+void imprimir_paciente(const Paciente* paciente) {
+    if (paciente == NULL) {
+        printf("Paciente inválido.\n");
+        return;
+    }
+
+    printf("ID: %d\n", paciente->id);
+    printf("CPF: %s\n", paciente->cpf);
+    printf("Nome: %s\n", paciente->nome);
+    printf("Idade: %d\n", paciente->idade);
+    printf("Data de Cadastro: %s\n", paciente->data_cadastro);
 }

@@ -1,227 +1,267 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "menu.h"
+#include "lista.h"
 #include "utils.h"
 
+// Função para limpar o buffer de entrada
+static void limpar_buffer() {
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF);
+}
+
+// Exibe o menu principal
 void exibir_menu() {
-    printf("\nHealthSys - Sistema de Gerenciamento de Pacientes\n");
-    printf("1 - Consultar paciente\n");
-    printf("2 - Atualizar paciente\n");
-    printf("3 - Remover paciente\n");
-    printf("4 - Inserir paciente\n");
-    printf("5 - Imprimir lista de pacientes\n");
-    printf("Q - Sair\n");
+    printf("\n=== Sistema de Gerenciamento de Pacientes ===\n");
+    printf("1. Consultar paciente\n");
+    printf("2. Atualizar paciente\n");
+    printf("3. Remover paciente\n");
+    printf("4. Inserir paciente\n");
+    printf("5. Imprimir lista de pacientes\n");
+    printf("Q. Sair\n");
     printf("Escolha uma opção: ");
 }
 
-void consultar_paciente(BDPaciente* bd) {
-    printf("\nEscolha o modo de consulta:\n");
-    printf("1 - Por nome\n");
-    printf("2 - Por CPF\n");
-    printf("3 - Retornar ao menu principal\n");
-    printf("Opção: ");
+// Processa a opção selecionada pelo usuário
+void processar_opcao(Lista* lista) {
+    char opcao;
+    scanf(" %c", &opcao);
+    limpar_buffer();
+
+    switch (toupper(opcao)) {
+        case '1':
+            consultar_paciente(lista);
+            break;
+        case '2':
+            atualizar_paciente(lista);
+            break;
+        case '3':
+            remover_paciente(lista);
+            break;
+        case '4':
+            inserir_paciente_menu(lista);
+            break;
+        case '5':
+            imprimir_lista_pacientes(lista);
+            break;
+        case 'Q':
+            printf("Saindo do sistema...\n");
+            break;
+        default:
+            printf("Opção inválida!\n");
+    }
+}
+
+// Funcionalidade de consulta
+void consultar_paciente(Lista* lista) {
+    printf("\n=== Consultar Paciente ===\n");
+    printf("1. Buscar por nome\n");
+    printf("2. Buscar por CPF\n");
+    printf("3. Voltar\n");
+    printf("Escolha o modo de busca: ");
 
     char opcao;
     scanf(" %c", &opcao);
     limpar_buffer();
 
-    Node* resultado = NULL;
-    switch (opcao) {
-        case '1': {
-            char nome[100];
-            printf("Digite o nome: ");
-            fgets(nome, sizeof(nome), stdin);
-            nome[strcspn(nome, "\n")] = 0;
-            resultado = buscar_paciente_por_nome(bd->lista, nome);
-            break;
+    if (opcao == '3') return;
+
+    if (opcao == '1') {
+        char nome[100];
+        printf("Digite o nome: ");
+        fgets(nome, sizeof(nome), stdin);
+        nome[strcspn(nome, "\n")] = '\0'; // Remove a quebra de linha
+
+        No* atual = lista->inicio;
+        int encontrados = 0;
+
+        printf("\nResultados da busca:\n");
+        while (atual != NULL) {
+            if (strstr(atual->paciente->nome, nome) != NULL) {
+                imprimir_paciente(atual->paciente);
+                encontrados++;
+            }
+            atual = atual->proximo;
         }
-        case '2': {
-            char cpf[15];
-            printf("Digite o CPF (formato xxx.xxx.xxx-xx): ");
-            fgets(cpf, sizeof(cpf), stdin);
-            cpf[strcspn(cpf, "\n")] = 0;
-            resultado = buscar_paciente_por_cpf(bd->lista, cpf);
-            break;
+
+        if (encontrados == 0) {
+            printf("Nenhum paciente encontrado.\n");
         }
-        case '3':
-            return;
-        default:
-            printf("Opção inválida!\n");
-            return;
-    }
 
-    if (resultado) {
-        printf("\nID  CPF            Nome                           Idade  Data Cadastro\n");
-        printf("----------------------------------------------------------------\n");
-        imprimir_paciente(&resultado->paciente);
-    } else {
-        printf("Paciente não encontrado.\n");
-    }
-}
-
-void atualizar_paciente(BDPaciente* bd) {
-    printf("\nPrimeiro, vamos localizar o paciente que deseja atualizar.\n");
-    
-    imprimir_pacientes(bd);
-    
-    int id;
-    printf("\nDigite o ID do registro a ser atualizado: ");
-    scanf("%d", &id);
-    limpar_buffer();
-
-    Node* atual = bd->lista->inicio;
-    while (atual && atual->paciente.id != id) {
-        atual = atual->prox;
-    }
-
-    if (!atual) {
-        printf("Paciente não encontrado!\n");
-        return;
-    }
-
-    printf("\nDigite o novo valor para os campos (ou '-' para manter o valor atual):\n");
-    
-    char cpf[15], nome[100], data[11];
-    // int idade;
-
-    printf("CPF atual: %s\nNovo CPF (xxx.xxx.xxx-xx): ", atual->paciente.cpf);
-    fgets(cpf, sizeof(cpf), stdin);
-    cpf[strcspn(cpf, "\n")] = 0;
-
-    printf("Nome atual: %s\nNovo nome: ", atual->paciente.nome);
-    fgets(nome, sizeof(nome), stdin);
-    nome[strcspn(nome, "\n")] = 0;
-
-    printf("Idade atual: %d\nNova idade: ", atual->paciente.idade);
-    char idade_str[10];
-    fgets(idade_str, sizeof(idade_str), stdin);
-    idade_str[strcspn(idade_str, "\n")] = 0;
-
-    printf("Data atual: %s\nNova data (AAAA-MM-DD): ", atual->paciente.data_cadastro);
-    fgets(data, sizeof(data), stdin);
-    data[strcspn(data, "\n")] = 0;
-
-    Paciente temp = atual->paciente;
-    if (strcmp(cpf, "-") != 0 && validar_cpf(cpf)) strcpy(temp.cpf, cpf);
-    if (strcmp(nome, "-") != 0) strcpy(temp.nome, nome);
-    if (strcmp(idade_str, "-") != 0) temp.idade = atoi(idade_str);
-    if (strcmp(data, "-") != 0 && validar_data(data)) strcpy(temp.data_cadastro, data);
-
-    printf("\nConfirma os novos valores para o registro abaixo? (S/N)\n");
-    printf("ID  CPF            Nome                           Idade  Data Cadastro\n");
-    printf("----------------------------------------------------------------\n");
-    imprimir_paciente(&temp);
-
-    char confirma;
-    scanf(" %c", &confirma);
-    limpar_buffer();
-
-    if (confirma == 'S' || confirma == 's') {
-        atual->paciente = temp;
-        salvar_bd(bd);
-        printf("Registro atualizado com sucesso.\n");
-    } else {
-        printf("Operação cancelada.\n");
-    }
-}
-
-void remover_paciente(BDPaciente* bd) {
-    printf("\nPrimeiro, vamos localizar o paciente que deseja remover.\n");
-    
-    imprimir_pacientes(bd);
-    
-    int id;
-    printf("\nDigite o ID do registro a ser removido: ");
-    scanf("%d", &id);
-    limpar_buffer();
-
-    Node* atual = bd->lista->inicio;
-    while (atual && atual->paciente.id != id) {
-        atual = atual->prox;
-    }
-
-    if (!atual) {
-        printf("Paciente não encontrado!\n");
-        return;
-    }
-
-    printf("\nTem certeza que deseja excluir o registro abaixo? (S/N)\n");
-    printf("ID  CPF            Nome                           Idade  Data Cadastro\n");
-    printf("----------------------------------------------------------------\n");
-    imprimir_paciente(&atual->paciente);
-
-    char confirma;
-    scanf(" %c", &confirma);
-    limpar_buffer();
-
-    if (confirma == 'S' || confirma == 's') {
-        remover_paciente_lista(bd->lista, id);
-        salvar_bd(bd);
-        printf("Registro removido com sucesso.\n");
-    } else {
-        printf("Operação cancelada.\n");
-    }
-}
-
-void inserir_paciente(BDPaciente* bd) {
-    Paciente novo;
-    char cpf[15], nome[100], data[11];
-
-    // Gerar novo ID
-    int maior_id = 0;
-    Node* atual = bd->lista->inicio;
-    while (atual != NULL) {
-        if (atual->paciente.id > maior_id) {
-            maior_id = atual->paciente.id;
-        }
-        atual = atual->prox;
-    }
-    novo.id = maior_id + 1;
-
-    printf("\nPara inserir um novo registro, digite os valores para os campos:\n");
-
-    do {
-        printf("CPF (xxx.xxx.xxx-xx): ");
+    } else if (opcao == '2') {
+        char cpf[15];
+        printf("Digite o CPF (com pontuação): ");
         fgets(cpf, sizeof(cpf), stdin);
-        cpf[strcspn(cpf, "\n")] = 0;
-    } while (!validar_cpf(cpf));
-    strcpy(novo.cpf, cpf);
+        cpf[strcspn(cpf, "\n")] = '\0';
+
+        Paciente* p = buscar_paciente_por_cpf(lista, cpf);
+        if (p != NULL) {
+            imprimir_paciente(p);
+        } else {
+            printf("Paciente não encontrado.\n");
+        }
+    }
+}
+
+// Funcionalidade de atualização
+void atualizar_paciente(Lista* lista) {
+    printf("\n=== Atualizar Paciente ===\n");
+    imprimir_lista_pacientes(lista);
+
+    int id;
+    printf("Digite o ID do paciente a ser atualizado: ");
+    scanf("%d", &id);
+    limpar_buffer();
+
+    No* atual = lista->inicio;
+    Paciente* paciente = NULL;
+
+    // Busca o paciente pelo ID
+    while (atual != NULL) {
+        if (atual->paciente->id == id) {
+            paciente = atual->paciente;
+            break;
+        }
+        atual = atual->proximo;
+    }
+
+    if (paciente == NULL) {
+        printf("ID inválido!\n");
+        return;
+    }
+
+    // Solicita novos valores
+    char novo_cpf[15], novo_nome[100], nova_data[11], temp[100];
+    int nova_idade;
+
+    printf("Novo CPF (atual: %s | '-' para manter): ", paciente->cpf);
+    fgets(novo_cpf, sizeof(novo_cpf), stdin);
+    novo_cpf[strcspn(novo_cpf, "\n")] = '\0';
+
+    printf("Novo nome (atual: %s | '-' para manter): ", paciente->nome);
+    fgets(novo_nome, sizeof(novo_nome), stdin);
+    novo_nome[strcspn(novo_nome, "\n")] = '\0';
+
+    printf("Nova idade (atual: %d | '-' para manter): ", paciente->idade);
+    fgets(temp, sizeof(temp), stdin);
+    temp[strcspn(temp, "\n")] = '\0';
+
+    printf("Nova data (atual: %s | '-' para manter): ", paciente->data_cadastro);
+    fgets(nova_data, sizeof(nova_data), stdin);
+    nova_data[strcspn(nova_data, "\n")] = '\0';
+
+    // Atualiza os campos (se não for '-')
+    if (strcmp(novo_cpf, "-") != 0) {
+        if (validar_cpf(novo_cpf)) {
+            strcpy(paciente->cpf, novo_cpf);
+        } else {
+            printf("CPF inválido!\n");
+            return;
+        }
+    }
+
+    if (strcmp(novo_nome, "-") != 0) {
+        strcpy(paciente->nome, novo_nome);
+    }
+
+    if (strcmp(temp, "-") != 0) {
+        nova_idade = atoi(temp);
+        paciente->idade = nova_idade;
+    }
+
+    if (strcmp(nova_data, "-") != 0) {
+        if (validar_data(nova_data)) {
+            strcpy(paciente->data_cadastro, nova_data);
+        } else {
+            printf("Data inválida!\n");
+            return;
+        }
+    }
+
+    printf("Paciente atualizado com sucesso!\n");
+}
+
+// Funcionalidade de remoção
+void remover_paciente(Lista* lista) {
+    printf("\n=== Remover Paciente ===\n");
+    imprimir_lista_pacientes(lista);
+
+    int id;
+    printf("Digite o ID do paciente a ser removido: ");
+    scanf("%d", &id);
+    limpar_buffer();
+
+    char confirmacao;
+    printf("Tem certeza? (S/N): ");
+    scanf(" %c", &confirmacao);
+
+    if (toupper(confirmacao) == 'S') {
+        remover_paciente_por_id(lista, id); // Função a ser implementada na lista
+        printf("Paciente removido!\n");
+    } else {
+        printf("Operação cancelada.\n");
+    }
+}
+
+// Funcionalidade de inserção
+void inserir_paciente_menu(Lista* lista) {
+    printf("\n=== Inserir Paciente ===\n");
+
+    // Gera o próximo ID
+    int novo_id = 1;
+    No* atual = lista->inicio;
+    while (atual != NULL) {
+        if (atual->paciente->id >= novo_id) {
+            novo_id = atual->paciente->id + 1;
+        }
+        atual = atual->proximo;
+    }
+
+    // Coleta os dados
+    char cpf[15], nome[100], data[11];
+    int idade;
+
+    printf("CPF (com pontuação): ");
+    fgets(cpf, sizeof(cpf), stdin);
+    cpf[strcspn(cpf, "\n")] = '\0';
 
     printf("Nome: ");
     fgets(nome, sizeof(nome), stdin);
-    nome[strcspn(nome, "\n")] = 0;
-    strcpy(novo.nome, nome);
+    nome[strcspn(nome, "\n")] = '\0';
 
     printf("Idade: ");
-    scanf("%d", &novo.idade);
+    scanf("%d", &idade);
     limpar_buffer();
 
-    do {
-        printf("Data de Cadastro (AAAA-MM-DD): ");
-        fgets(data, sizeof(data), stdin);
-        data[strcspn(data, "\n")] = 0;
-    } while (!validar_data(data));
-    strcpy(novo.data_cadastro, data);
+    printf("Data (AAAA-MM-DD): ");
+    fgets(data, sizeof(data), stdin);
+    data[strcspn(data, "\n")] = '\0';
 
-    printf("\nConfirma a inserção do registro abaixo? (S/N)\n");
-    printf("ID  CPF            Nome                           Idade  Data Cadastro\n");
-    printf("----------------------------------------------------------------\n");
-    imprimir_paciente(&novo);
-
-    char confirma;
-    scanf(" %c", &confirma);
-    limpar_buffer();
-
-    if (confirma == 'S' || confirma == 's') {
-        inserir_paciente_lista(bd->lista, novo);
-        salvar_bd(bd);
-        printf("Registro inserido com sucesso.\n");
-    } else {
-        printf("Operação cancelada.\n");
+    // Valida os dados
+    if (!validar_cpf(cpf) || !validar_data(data)) {
+        printf("Dados inválidos!\n");
+        return;
     }
+
+    // Cria e insere o paciente
+    Paciente* p = criar_paciente(novo_id, cpf, nome, idade, data);
+    inserir_paciente(lista, p);
+    printf("Paciente inserido com sucesso!\n");
 }
 
-void imprimir_pacientes(BDPaciente* bd) {
-    imprimir_lista(bd->lista);
+// Funcionalidade de impressão da lista
+void imprimir_lista_pacientes(Lista* lista) {
+    printf("\n=== Lista de Pacientes ===\n");
+    printf("ID | CPF           | Nome              | Idade | Data Cadastro\n");
+    printf("--------------------------------------------------------------\n");
+
+    No* atual = lista->inicio;
+    while (atual != NULL) {
+        Paciente* p = atual->paciente;
+        printf("%-2d | %-13s | %-17s | %-5d | %s\n",
+               p->id, p->cpf, p->nome, p->idade, p->data_cadastro);
+        atual = atual->proximo;
+    }
 }

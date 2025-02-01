@@ -1,10 +1,8 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-// Funções auxiliares
-int validar_cpf(const char* cpf);
+// Funções do módulo Utilidades
+int validar_cpf(const char* cpf_com_pontuacao);
 int validar_data(const char* data);
-void formatar_cpf(char* cpf_formatado, const char* cpf);
-void limpar_buffer();
 
-#endif
+#endif // UTILS_H

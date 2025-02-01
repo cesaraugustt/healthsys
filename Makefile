@@ -1,33 +1,38 @@
-# Compilador e flags
-CC=gcc
-CFLAGS=-Wall -Wextra -g -std=c99
+CC = gcc
+CFLAGS = -Wall -g
+SRC_DIR = src
+OBJ_DIR = obj
+TARGET = healthsys
 
-# Diretórios
-SRC_DIR=src
-OBJ_DIR=obj
+# Definindo arquivos fontes e objetos
+SRCS = $(wildcard $(SRC_DIR)/*.c)
+OBJS = $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+DEP = $(OBJS:.o=.d)
 
-# Lista de objetos com caminho correto
-OBJS=$(OBJ_DIR)/main.o $(OBJ_DIR)/paciente.o $(OBJ_DIR)/lista.o $(OBJ_DIR)/bd_paciente.o $(OBJ_DIR)/utils.o $(OBJ_DIR)/menu.o
-
-# Nome do executável
-TARGET=healthsys
-
-# Regra principal
+# Regra padrão para compilar o programa
 all: $(TARGET)
 
-# Gera o executável
+# Regra para gerar o executável
 $(TARGET): $(OBJS)
-	$(CC) $(OBJS) -o $(TARGET)
+	$(CC) $(CFLAGS) -o $(TARGET) $(OBJS)
 
-# Regra genérica para compilar arquivos .c para .o
+# Compilação dos arquivos .c para .o
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
-	mkdir -p $(OBJ_DIR)  # Cria o diretório se não existir
+	@mkdir -p $(OBJ_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Limpeza dos arquivos compilados
-clean:
-	rm -rf $(OBJ_DIR)/*.o $(TARGET)
+# Geração das dependências
+$(OBJ_DIR)/%.d: $(SRC_DIR)/%.c
+	@mkdir -p $(OBJ_DIR)
+	$(CC) -MM $(CFLAGS) $< > $@
+
+# Incluir as dependências
+-include $(DEP)
 
 # Regra para rodar o programa
 run: $(TARGET)
 	./$(TARGET)
+
+# Regra para limpar arquivos gerados
+clean:
+	rm -rf $(OBJ_DIR) $(TARGET) $(DEP)

@@ -1,48 +1,30 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include "bd_paciente.h"
+#include "lista.h"
+#include "arquivo.h"
 #include "menu.h"
-#include "utils.h"
 
 int main() {
-    BDPaciente* bd = criar_bd();
-    if (!bd || carregar_bd(bd) != 0) {
-        printf("Erro ao inicializar o banco de dados!\n");
-        return 1;
-    }
+    // Carrega os pacientes do arquivo CSV
+    Lista* lista = carregar_pacientes_csv("bd_paciente.csv");
 
-    char opcao;
+    char opcao = '\0';  // Inicializando 'opcao' com um valor default
     do {
-        exibir_menu();
-        scanf(" %c", &opcao);
-        limpar_buffer();
-
-        switch (opcao) {
-            case '1':
-                consultar_paciente(bd);
-                break;
-            case '2':
-                atualizar_paciente(bd);
-                break;
-            case '3':
-                remover_paciente(bd);
-                break;
-            case '4':
-                inserir_paciente(bd);
-                break;
-            case '5':
-                imprimir_pacientes(bd);
-                break;
-            case 'Q':
-            case 'q':
-                printf("Salvando dados e encerrando...\n");
-                salvar_bd(bd);
-                break;
-            default:
-                printf("Opção inválida!\n");
-        }
+        exibir_menu();              // Exibe o menu principal
+        processar_opcao(lista);     // Processa a opção escolhida pelo usuário
+        
+        // Solicita ao usuário uma opção
+        printf("\nEscolha uma opção (ou 'Q' para sair): ");
+        scanf(" %c", &opcao);  // Usa o espaço antes de %c para garantir que o 'Enter' anterior seja consumido
+        
+        printf("\nPressione Enter para continuar...");
+        while (getchar() != '\n');  // Aguarda confirmação do usuário
     } while (opcao != 'Q' && opcao != 'q');
 
-    liberar_bd(bd);
+    // Salva os dados atualizados no arquivo CSV
+    salvar_pacientes_csv("bd_paciente.csv", lista);
+
+    // Libera toda a memória alocada
+    liberar_lista(lista);
+
     return 0;
 }

@@ -1,14 +1,15 @@
 #ifndef MENU_H
 #define MENU_H
 
-#include "bd_paciente.h"
+#include "lista.h"
 
-// Funções do menu
+// Funções do módulo Menu
 void exibir_menu();
-void consultar_paciente(BDPaciente* bd);
-void atualizar_paciente(BDPaciente* bd);
-void remover_paciente(BDPaciente* bd);
-void inserir_paciente(BDPaciente* bd);
-void imprimir_pacientes(BDPaciente* bd);
+void processar_opcao(Lista* lista);
+void consultar_paciente(Lista* lista);
+void atualizar_paciente(Lista* lista);
+void remover_paciente(Lista* lista);
+void inserir_paciente_menu(Lista* lista);
+void imprimir_lista_pacientes(Lista* lista);
 
-#endif
+#endif // MENU_H
