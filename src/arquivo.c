@@ -6,10 +6,11 @@
 #include "paciente.h"
 
 // Função para carregar pacientes de um arquivo CSV
-Lista* carregar_pacientes_csv(const char* nome_arquivo) {
-    FILE* arquivo = fopen(nome_arquivo, "r");
+void carregar_bd(BDPaciente* bd) {
+    FILE* arquivo = fopen(bd->arquivo, "r");
     if (arquivo == NULL) {
-        fprintf(stderr, "Arquivo %s não encontrado. Iniciando com lista vazia.\n", nome_arquivo);
+        printf("Arquivo %s não encontrado. Iniciando com lista vazia.\n", bd->arquivo);
+        bd->prox_id = 1;
         return criar_lista(); // Retorna uma lista vazia se o arquivo não existir
     }
 
@@ -18,6 +19,9 @@ Lista* carregar_pacientes_csv(const char* nome_arquivo) {
 
     // Ignora o cabeçalho do CSV
     fgets(linha, sizeof(linha), arquivo);
+
+    // Variável para acompanhar o maior ID encontrado
+    int max_id = 0;
 
     while (fgets(linha, sizeof(linha), arquivo) != NULL) {
         // Remove a quebra de linha
@@ -36,13 +40,18 @@ Lista* carregar_pacientes_csv(const char* nome_arquivo) {
 
         // Verifica se todos os campos foram lidos
         if (i != 5) {
-            fprintf(stderr, "Linha inválida no CSV: %s\n", linha);
+            printf("Linha inválida no CSV: %s\n", linha);
             continue;
         }
 
         // Converte os campos para os tipos corretos
         int id = atoi(campos[0]);
         int idade = atoi(campos[3]);
+
+        // Atualiza o maior ID
+        if (id >= max_id) {
+            max_id = id + 1;
+        }
 
         // Cria o paciente e insere na lista
         Paciente* paciente = criar_paciente(
@@ -53,18 +62,20 @@ Lista* carregar_pacientes_csv(const char* nome_arquivo) {
             campos[4]     // Data_Cadastro
         );
 
-        inserir_paciente(lista, paciente);
+        inserir_paciente(bd->lista, paciente);
     }
+    // Atualiza o prox_id do BDPaciente
+    bd->prox_id = max_id;
 
     fclose(arquivo);
-    return lista;
+    // return bd->lista;
 }
 
 // Função para salvar pacientes em um arquivo CSV
-void salvar_pacientes_csv(const char* nome_arquivo, Lista* lista) {
-    FILE* arquivo = fopen(nome_arquivo, "w");
+void salvar_pacientes_bd(BDPaciente* bd) {
+    FILE* arquivo = fopen(bd->arquivo, "w");
     if (arquivo == NULL) {
-        fprintf(stderr, "Erro ao abrir o arquivo %s para escrita.\n", nome_arquivo);
+        fprintf(stderr, "Erro ao abrir o arquivo %s para escrita.\n", bd->arquivo);
         return;
     }
 
@@ -72,7 +83,7 @@ void salvar_pacientes_csv(const char* nome_arquivo, Lista* lista) {
     fprintf(arquivo, "ID,CPF,Nome,Idade,Data_Cadastro\n");
 
     // Percorre a lista e escreve cada paciente
-    No* atual = lista->inicio;
+    Node* atual = bd->lista->inicio;
     while (atual != NULL) {
         Paciente* p = atual->paciente;
         fprintf(
@@ -88,5 +99,17 @@ void salvar_pacientes_csv(const char* nome_arquivo, Lista* lista) {
     }
 
     fclose(arquivo);
-    printf("Dados salvos com sucesso em %s.\n", nome_arquivo);
+    printf("Dados salvos com sucesso em %s.\n", bd->arquivo);
+}
+
+void liberar_bd(BDPaciente* bd) {
+    if (bd != NULL) {
+        if (bd->lista != NULL) {
+            liberar_lista(bd->lista);
+        }
+        if (bd->arquivo != NULL) {
+            free(bd->arquivo);
+        }
+        free(bd);
+    }
 }

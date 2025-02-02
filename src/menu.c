@@ -4,6 +4,7 @@
 #include <ctype.h>
 #include "menu.h"
 #include "lista.h"
+#include "arquivo.h"
 #include "utils.h"
 
 // Função para limpar o buffer de entrada
@@ -14,7 +15,7 @@ static void limpar_buffer() {
 
 // Exibe o menu principal
 void exibir_menu() {
-    printf("\n=== Sistema de Gerenciamento de Pacientes ===\n");
+    printf("\nHealthSys - Sistema de Gerenciamento de Pacientes\n");
     printf("1. Consultar paciente\n");
     printf("2. Atualizar paciente\n");
     printf("3. Remover paciente\n");
@@ -25,34 +26,70 @@ void exibir_menu() {
 }
 
 // Processa a opção selecionada pelo usuário
-void processar_opcao(Lista* lista) {
-    char opcao;
-    scanf(" %c", &opcao);
-    limpar_buffer();
+// void processar_opcao(BDPaciente* bd) {
+//     char opcao;
+//     scanf(" %c", &opcao);
+//     limpar_buffer();
 
-    switch (toupper(opcao)) {
-        case '1':
-            consultar_paciente(lista);
-            break;
-        case '2':
-            atualizar_paciente(lista);
-            break;
-        case '3':
-            remover_paciente(lista);
-            break;
-        case '4':
-            inserir_paciente_menu(lista);
-            break;
-        case '5':
-            imprimir_lista_pacientes(lista);
-            break;
-        case 'Q':
-            printf("Saindo do sistema...\n");
-            break;
-        default:
-            printf("Opção inválida!\n");
-    }
-}
+//     switch (toupper(opcao)) {
+//         case '1':
+//             consultar_paciente(bd->lista);
+//             break;
+//         case '2':
+//             atualizar_paciente(bd->lista);
+//             break;
+//         case '3':
+//             remover_paciente(bd->lista);
+//             break;
+//         case '4':
+//             inserir_paciente_menu(bd);
+//             break;
+//         case '5':
+//             imprimir_lista_pacientes(bd->lista);
+//             break;
+//         case 'Q':
+//             printf("Saindo do sistema...\n");
+//             break;
+//         default:
+//             printf("Opção inválida!\n");
+//     }
+// }
+
+void processar_opcao(BDPaciente* bd) {
+    char opcao;
+    do {
+        exibir_menu();
+        scanf(" %c", &opcao);
+        limpar_buffer();
+
+        switch (opcao) {
+            case '1':
+                consultar_paciente(bd->lista);
+                break;
+            case '2':
+                atualizar_paciente(bd->lista);
+                break;
+            case '3':
+                remover_paciente(bd->lista);
+                break;
+            case '4':
+                inserir_paciente_menu(bd);
+                break;
+            case '5':
+                imprimir_lista_pacientes(bd->lista);
+                break;
+            case 'Q':
+            case 'q':
+                printf("Salvando dados e encerrando...\n");
+                salvar_pacientes_bd(bd);
+                break;
+            default:
+                printf("Opção inválida!\n");
+        }
+    } while (opcao != 'Q' && opcao != 'q');
+
+    liberar_bd(bd);
+}    
 
 // Funcionalidade de consulta
 void consultar_paciente(Lista* lista) {
@@ -74,7 +111,7 @@ void consultar_paciente(Lista* lista) {
         fgets(nome, sizeof(nome), stdin);
         nome[strcspn(nome, "\n")] = '\0'; // Remove a quebra de linha
 
-        No* atual = lista->inicio;
+        Node* atual = lista->inicio;
         int encontrados = 0;
 
         printf("\nResultados da busca:\n");
@@ -115,7 +152,7 @@ void atualizar_paciente(Lista* lista) {
     scanf("%d", &id);
     limpar_buffer();
 
-    No* atual = lista->inicio;
+    Node* atual = lista->inicio;
     Paciente* paciente = NULL;
 
     // Busca o paciente pelo ID
@@ -196,9 +233,10 @@ void remover_paciente(Lista* lista) {
     char confirmacao;
     printf("Tem certeza? (S/N): ");
     scanf(" %c", &confirmacao);
+    limpar_buffer();
 
     if (toupper(confirmacao) == 'S') {
-        remover_paciente_por_id(lista, id); // Função a ser implementada na lista
+        remover_paciente_por_id(lista, id);
         printf("Paciente removido!\n");
     } else {
         printf("Operação cancelada.\n");
@@ -206,18 +244,20 @@ void remover_paciente(Lista* lista) {
 }
 
 // Funcionalidade de inserção
-void inserir_paciente_menu(Lista* lista) {
+void inserir_paciente_menu(BDPaciente* bd) {
     printf("\n=== Inserir Paciente ===\n");
 
-    // Gera o próximo ID
-    int novo_id = 1;
-    No* atual = lista->inicio;
-    while (atual != NULL) {
-        if (atual->paciente->id >= novo_id) {
-            novo_id = atual->paciente->id + 1;
-        }
-        atual = atual->proximo;
-    }
+    // int novo_id = 1;
+    // Node* atual = lista->inicio;
+    // while (atual != NULL) {
+    //     if (atual->paciente->id >= novo_id) {
+    //         novo_id = atual->paciente->id + 1;
+    //     }
+    //     atual = atual->proximo;
+    // }
+
+    int novo_id = bd->prox_id;
+    bd->prox_id++;
 
     // Coleta os dados
     char cpf[15], nome[100], data[11];
@@ -247,7 +287,7 @@ void inserir_paciente_menu(Lista* lista) {
 
     // Cria e insere o paciente
     Paciente* p = criar_paciente(novo_id, cpf, nome, idade, data);
-    inserir_paciente(lista, p);
+    inserir_paciente(bd->lista, p);
     printf("Paciente inserido com sucesso!\n");
 }
 
@@ -257,7 +297,7 @@ void imprimir_lista_pacientes(Lista* lista) {
     printf("ID | CPF           | Nome              | Idade | Data Cadastro\n");
     printf("--------------------------------------------------------------\n");
 
-    No* atual = lista->inicio;
+    Node* atual = lista->inicio;
     while (atual != NULL) {
         Paciente* p = atual->paciente;
         printf("%-2d | %-13s | %-17s | %-5d | %s\n",

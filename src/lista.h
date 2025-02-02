@@ -3,20 +3,20 @@
 
 #include "paciente.h"
 
-typedef struct No {
+typedef struct node {
     Paciente* paciente;
-    struct No* proximo;
-} No;
+    Node* proximo;
+} Node;
 
 typedef struct {
-    No* inicio;
-    int tamanho; // Número de elementos na lista
+    Node* inicio;
+    int quantidade; // Número de elementos na lista
 } Lista;
 
 Lista* criar_lista();
 void inserir_paciente(Lista* lista, Paciente* paciente);
-Paciente* buscar_paciente_por_cpf(Lista* lista, const char* cpf);
-Paciente* buscar_paciente_por_nome(Lista* lista, const char* nome);
+Node* buscar_paciente_por_cpf(Lista* lista, const char* cpf);
+Node* buscar_paciente_por_nome(Lista* lista, const char* nome);
 void remover_paciente_por_id(Lista* lista, int id);
 void imprimir_lista(Lista* lista);
 void liberar_lista(Lista* lista);

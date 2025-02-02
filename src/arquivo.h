@@ -1,10 +1,18 @@
 #ifndef ARQUIVO_H
 #define ARQUIVO_H
 
-#include "lista.h" // Inclui a definição de Lista
+#include "lista.h"
 
-// Funções do módulo CSV
-Lista* carregar_pacientes_csv(const char* nome_arquivo);
-void salvar_pacientes_csv(const char* nome_arquivo, Lista* lista);
+#define ARQUIVO_BD "bd_paciente.csv"
 
-#endif // CSV_H
+typedef struct {
+    Lista* lista;
+    char* arquivo;
+    int prox_id;
+} BDPaciente;
+
+void carregar_bd(BDPaciente* bd);
+void salvar_bd(BDPaciente* bd);
+void liberar_bd(BDPaciente* bd);
+
+#endif
