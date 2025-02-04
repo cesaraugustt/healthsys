@@ -1,34 +1,22 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "lista.h"
-#include "arquivo.h"
-#include "menu.h"
-
-// int main() {
-//     // Carrega os pacientes do arquivo CSV
-//     Lista* lista = carregar_pacientes_csv("bd_paciente.csv");
-
-//     char opcao = '\0';  // Inicializando 'opcao' com um valor default
-//     do {
-//         exibir_menu();              // Exibe o menu principal
-//         processar_opcao(lista);     // Processa a opção escolhida pelo usuário
-        
-//         // Solicita ao usuário uma opção
-//         printf("\nEscolha uma opção (ou 'Q' para sair): ");
-//         scanf(" %c", &opcao);  // Usa o espaço antes de %c para garantir que o 'Enter' anterior seja consumido
-        
-//         printf("\nPressione Enter para continuar...");
-//         while (getchar() != '\n');  // Aguarda confirmação do usuário
-//     } while (opcao != 'Q' && opcao != 'q');
-
-//     // Salva os dados atualizados no arquivo CSV
-//     salvar_pacientes_csv("bd_paciente.csv", lista);
-
-//     // Libera toda a memória alocada
-//     liberar_lista(lista);
-
-//     return 0;
-// }
 
 int main() {
-    BDPaciente* bd = carregar_bd()
+    Paciente* novo_paciente = criar_paciente(1, "123.456.789-09", "César", 24, "2025-02-03");
+    Paciente* novo_paciente3 = criar_paciente(1, "606.184.184-15", "César Augusto", 24, "2025-02-03");
+    Lista* nova_lista = criar_lista();
+    // imprimir_paciente(novo_paciente);
+    inserir_paciente(nova_lista, novo_paciente);
+    Paciente* novo_paciente2 = criar_paciente(2, "154.701.577-25", "João", 24, "2025-02-03");
+    inserir_paciente(nova_lista, novo_paciente2);
+    inserir_paciente(nova_lista, novo_paciente3);
+    // imprimir_pacientes(nova_lista);
+    // liberar_paciente(novo_paciente);
+    // buscar_por_nome(nova_lista, "César");
+    buscar_por_cpf(nova_lista, "123.456.789-09");
+    liberar_lista(nova_lista);
+
+    return 0;
 }

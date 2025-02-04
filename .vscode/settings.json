@@ -1,5 +1,8 @@
 {
     "files.associations": {
-        "menu.h": "c"
+        "menu.h": "c",
+        "string.h": "c",
+        "lista.h": "c",
+        "paciente.h": "c"
     }
 }

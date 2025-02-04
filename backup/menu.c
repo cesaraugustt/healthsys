@@ -93,10 +93,10 @@ void processar_opcao(BDPaciente* bd) {
 
 // Funcionalidade de consulta
 void consultar_paciente(Lista* lista) {
-    printf("\n=== Consultar Paciente ===\n");
+    printf("\nEscolha o modo de consulta:\n");
     printf("1. Buscar por nome\n");
     printf("2. Buscar por CPF\n");
-    printf("3. Voltar\n");
+    printf("3. Retornar ao menu principal\n");
     printf("Escolha o modo de busca: ");
 
     char opcao;
