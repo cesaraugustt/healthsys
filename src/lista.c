@@ -42,15 +42,18 @@ void inserir_paciente(Lista* lista, Paciente* paciente) {
         return;
     }
 
-    No* no = criar_no(paciente);
-
     if (lista->ultimo == NULL) {
-        lista->primeiro = no;
+        lista->primeiro = lista->ultimo = criar_no(paciente);
     } else {
+        No* no = criar_no(paciente);
+        if (no == NULL) {
+            fprintf(stderr, "Erro ao alocar memória para o nó!\n");
+            return;
+        }
         lista->ultimo->proximo = no;
         no->anterior = lista->ultimo;
+        lista->ultimo = no;
     }
-    lista->ultimo = no;
 }
 
 void remover_paciente(Lista* lista, int id) {
@@ -60,15 +63,33 @@ void remover_paciente(Lista* lista, int id) {
     }
 
     No* atual = lista->primeiro;
-    while (atual != NULL) {
-        No* proximo = atual->proximo;
-        if (atual->paciente != NULL && atual->paciente->id == id) {          
-            liberar_paciente(atual->paciente);
-            free(atual);
-            return;
-        }
-        atual = proximo;
+    No* anterior = NULL;
+    // Percorre a lista ate encontrar o paciente com o ID especificado
+    while (atual != NULL && atual->paciente->id != id) {
+        anterior = atual;
+        atual = atual->proximo;
     }
+
+    if (atual == NULL) {
+        printf("Paciente nao encontrado.\n");
+        return;
+    }
+
+    if (anterior == NULL) {
+        lista->primeiro = atual->proximo;
+    } else {
+        anterior->proximo = atual->proximo;
+    }
+
+    if (atual->proximo == NULL) {
+        lista->ultimo = anterior;
+    } else {
+        atual->proximo->anterior = anterior;
+    }
+
+    liberar_paciente(atual->paciente);
+    free(atual);
+    printf("Paciente removido com sucesso.\n");
 }
 
 void imprimir_lista(Lista* lista) {
@@ -110,22 +131,21 @@ void buscar_por_nome(Lista* lista, const char* nome) {
     No* atual = lista->primeiro;
     printf("%-4s %-15s %-30s %-6s %s\n", "ID", "CPF", "Nome", "Idade", "Data Cadastro");
     while (atual != NULL) {
-        No* proximo = atual->proximo;
         if (strstr(atual->paciente->nome, nome) != NULL) {
             imprimir_paciente(atual->paciente);
         }
-        atual = proximo;
+        atual = atual->proximo;
     }
 }
 
 void buscar_por_cpf(Lista* lista, const char* cpf) {
     No* atual = lista->primeiro;
-    printf("%-4s %-15s %-30s %-6s %s\n", "ID", "CPF", "Nome", "Idade", "Data Cadastro");
-    while (atual != NULL) {
-        No* proximo = atual->proximo;
-        if (strcmp(atual->paciente->cpf, cpf) == 0) {
-            imprimir_paciente(atual->paciente);
-        }
-        atual = proximo;
+    while (atual != NULL && strcmp(atual->paciente->cpf, cpf) != 0) {
+        atual = atual->proximo;
+    }
+
+    if (atual != NULL) {
+        printf("%-4s %-15s %-30s %-6s %s\n", "ID", "CPF", "Nome", "Idade", "Data Cadastro");
+        imprimir_paciente(atual->paciente);
     }
 }

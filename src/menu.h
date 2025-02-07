@@ -9,7 +9,7 @@ void exibir_menu();
 void menu(Lista* lista);
 void consultar_paciente(Lista* lista);
 void cadastrar_paciente(Lista* lista);
-// void remover_paciente(BDPaciente* bd);
-// void inserir_paciente_menu(BDPaciente* bd);
+void remover_paciente_menu(Lista* lista);
+void atualizar_paciente_menu(Lista* lista);
 
 #endif
