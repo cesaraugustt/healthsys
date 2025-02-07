@@ -3,6 +3,9 @@
         "menu.h": "c",
         "string.h": "c",
         "lista.h": "c",
-        "paciente.h": "c"
+        "paciente.h": "c",
+        "array": "c",
+        "string": "c",
+        "string_view": "c"
     }
 }

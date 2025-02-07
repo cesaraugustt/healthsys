@@ -20,6 +20,25 @@ const char* data_cadastro) {
     return novo_paciente;
 }
 
+void atualizar_paciente(Paciente* paciente, const char* cpf, const char* nome, int idade, const char* data_cadastro) {
+    if (paciente == NULL) {
+        printf("Paciente inválido.\n");
+        return;
+    }
+
+    if (strlen(cpf) > 14 || strlen(nome) > 99 || strlen(data_cadastro) > 10) {
+        printf("Os dados do paciente não podem exceder os limites de tamanho.\n");
+        return;
+    }
+
+    strcpy(paciente->cpf, cpf);
+    strcpy(paciente->nome, nome);
+    paciente->idade = idade;
+    strcpy(paciente->data_cadastro, data_cadastro);
+
+    printf("Paciente atualizado com sucesso!\n");
+}
+
 void imprimir_paciente(const Paciente* paciente) {
     if (paciente == NULL) {
         printf("Paciente inválido.\n");
@@ -30,7 +49,9 @@ void imprimir_paciente(const Paciente* paciente) {
 }
 
 void liberar_paciente(Paciente* paciente) {
-    if (paciente != NULL) {
-        free(paciente);
+    if (paciente == NULL) {
+        fprintf(stderr, "Erro: Tentativa de liberar um paciente nulo.\n");
+        return;
     }
+    free(paciente);
 }

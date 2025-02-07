@@ -19,7 +19,7 @@ void inserir_paciente(Lista* lista, Paciente* paciente);
 void buscar_por_nome(Lista* lista, const char* nome);
 void buscar_por_cpf(Lista* lista, const char* cpf);
 void remover_paciente(Lista* lista, int id);
-void imprimir_pacientes(Lista* lista);
+void imprimir_lista(Lista* lista);
 void liberar_lista(Lista* lista);
 
 #endif
