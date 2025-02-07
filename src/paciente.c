@@ -5,33 +5,53 @@
 
 Paciente* criar_paciente(int id, const char* cpf, const char* nome, int idade,
 const char* data_cadastro) {
-    Paciente* paciente = (Paciente*)malloc(sizeof(Paciente));
-    if (paciente == NULL) {
-        return NULL;
+    Paciente* novo_paciente = (Paciente*)malloc(sizeof(Paciente));
+    if (novo_paciente == NULL) {
+        printf("Erro ao alocar memória!\n");
+        exit(1);
     }
 
-    paciente->id = id;
-    strncpy(paciente->cpf, cpf, sizeof(paciente->cpf) - 1);
-    paciente->cpf[sizeof(paciente->cpf) - 1] = '\0';
+    novo_paciente->id = id;
+    strcpy(novo_paciente->cpf,cpf);
+    strcpy(novo_paciente->nome, nome);
+    novo_paciente->idade = idade;
+    strcpy(novo_paciente->data_cadastro, data_cadastro);
     
-    strncpy(paciente->nome, nome, sizeof(paciente->nome) - 1);
-    paciente->nome[sizeof(paciente->nome) - 1] = '\0';
-    
+    return novo_paciente;
+}
+
+void atualizar_paciente(Paciente* paciente, const char* cpf, const char* nome, int idade, const char* data_cadastro) {
+    if (paciente == NULL) {
+        printf("Paciente inválido.\n");
+        return;
+    }
+
+    if (strlen(cpf) > 14 || strlen(nome) > 99 || strlen(data_cadastro) > 10) {
+        printf("Os dados do paciente não podem exceder os limites de tamanho.\n");
+        return;
+    }
+
+    strcpy(paciente->cpf, cpf);
+    strcpy(paciente->nome, nome);
     paciente->idade = idade;
-    
-    strncpy(paciente->data_cadastro, data_cadastro, sizeof(paciente->data_cadastro) - 1);
-    paciente->data_cadastro[sizeof(paciente->data_cadastro) - 1] = '\0';
-    
-    return paciente;
+    strcpy(paciente->data_cadastro, data_cadastro);
+
+    printf("Paciente atualizado com sucesso!\n");
 }
 
 void imprimir_paciente(const Paciente* paciente) {
-    if (paciente != NULL) {
-        printf("ID: %d, CPF: %s, Nome: %s, Idade: %d, Data Cadastro: %s\n",
-           paciente->id, paciente->cpf, paciente->nome, paciente->idade, paciente->data_cadastro);
+    if (paciente == NULL) {
+        printf("Paciente inválido.\n");
+        return;
     }
+    printf("%-4d %-15s %-30s %-6d %s\n", paciente->id, paciente->cpf,
+    paciente->nome, paciente->idade, paciente->data_cadastro);
 }
 
 void liberar_paciente(Paciente* paciente) {
+    if (paciente == NULL) {
+        fprintf(stderr, "Erro: Tentativa de liberar um paciente nulo.\n");
+        return;
+    }
     free(paciente);
 }
