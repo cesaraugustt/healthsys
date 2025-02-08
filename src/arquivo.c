@@ -4,66 +4,81 @@
 #include "arquivo.h"
 
 Lista* carregar_bd() {
+    // Abre o arquivo CSV para leitura
     FILE* file = fopen(ARQUIVO_BD, "r");
     if (file == NULL) {
         printf("Arquivo CSV não encontrado, iniciando com lista vazia...\n");
-        return criar_lista();
+        return criar_lista(); // Retorna lista vazia se o arquivo não existir
     }
 
+    // Cria uma nova lista de pacientes
     Lista* lista = criar_lista();
+    if (lista == NULL) {
+        fprintf(stderr, "Erro ao criar lista\n");
+        fclose(file);
+        return NULL; // Retorna NULL em caso de erro na criação da lista
+    }
 
     char linha[256];
 
-    // Ignora o cabeçalho
-    fgets(linha, sizeof(linha), file);
+    // Ignora o cabeçalho do arquivo CSV
+    if (fgets(linha, sizeof(linha), file) == NULL) {
+        printf("Aviso: O arquivo está vazio ou contém apenas o cabeçalho.\n");
+        fclose(file);
+        return lista; // Retorna a lista vazia corretamente
+    }
     
+    // Lê cada linha do arquivo CSV
     while (fgets(linha, sizeof(linha), file) != NULL) {
         int id, idade;
         char cpf[15], nome[100], data_cadastro[11];
 
-        // Lê os campos da linha
-        if (sscanf(linha, "%d,%14[^,],%99[^,],%d,%10[^,]", &id, cpf, nome, &idade,
-            data_cadastro) != 5) {
-            // Erro ao ler linha do arquivo csv
-            printf("Erro ao ler linha do arquivo csv: %s\n", linha);
-            fclose(file);
-            return lista;
+        // Extrai os campos da linha lida
+        if (sscanf(linha, "%d,%14[^,],%99[^,],%d,%10[^,]", &id, cpf, nome, &idade, data_cadastro) != 5) {
+            fprintf(stderr, "Erro ao ler linha do arquivo csv: %s\n", linha);
+            continue; // Continua para a próxima linha em caso de erro de leitura
+        }
+
+        // Cria um novo paciente com os dados lidos
+        Paciente* paciente = criar_paciente(id, cpf, nome, idade, data_cadastro);
+        if (paciente == NULL) {
+            fprintf(stderr, "Erro ao criar paciente\n");
+            continue; // Continua para a próxima linha se ocorrer erro na criação do paciente
         }
 
         // Insere o paciente na lista
-        inserir_paciente(lista, criar_paciente(id, cpf, nome, idade, data_cadastro));
+        inserir_paciente(lista, paciente);
     }
 
-    fclose(file);
-    return lista;
+    fclose(file); // Fecha o arquivo após a leitura
+    return lista; // Retorna a lista populada
 }
 
 void salvar_bd(Lista* lista) {
+    // Abre o arquivo CSV para escrita
     FILE* file = fopen(ARQUIVO_BD, "w");
     if (file == NULL) {
-        printf("Erro ao abrir o arquivo %s\n", ARQUIVO_BD);
+        fprintf(stderr, "Erro ao abrir o arquivo %s\n", ARQUIVO_BD);
         return;
     }
 
-    // Escreve o cabeçalho
+    // Escreve o cabeçalho do arquivo CSV
     fprintf(file, "ID,CPF,Nome,Idade,Data_Cadastro\n");
 
-    // Percorre a lista e escreve cada paciente
+    // Percorre a lista e escreve cada paciente no arquivo
     No* atual = lista->primeiro;
     while (atual != NULL) {
         Paciente* p = atual->paciente;
-        fprintf(
-            file,
-            "%d,%s,%s,%d,%s\n",
-            p->id,
-            p->cpf,
-            p->nome,
-            p->idade,
-            p->data_cadastro
-        );
+        if (atual->proximo == NULL) {
+            // Se for o último registro, não inclui o caractere de nova linha
+            fprintf(file, "%d,%s,%s,%d,%s", p->id, p->cpf, p->nome, p->idade, p->data_cadastro);
+        } else {
+            fprintf(file, "%d,%s,%s,%d,%s\n", p->id, p->cpf, p->nome, p->idade, p->data_cadastro);
+        }
         atual = atual->proximo;
     }
 
+    // Fecha o arquivo após a escrita
     fclose(file);
     printf("Dados salvos com sucesso em %s.\n", ARQUIVO_BD);
-    }
+}
