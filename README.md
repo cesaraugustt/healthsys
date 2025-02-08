@@ -87,6 +87,10 @@ make
 ```bash
 ./healthsys
 ```
+Ou
+```bash
+make run
+```
 
 ## Requisitos
 
