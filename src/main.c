@@ -5,6 +5,16 @@
 
 int main() {
     Lista* pacientes = carregar_bd();
+    if (pacientes == NULL) {
+        fprintf(stderr, "Erro ao carregar lista de pacientes.\n");
+        return 1;
+    }
+
     menu(pacientes);
+
+    if (pacientes != NULL) {
+        liberar_lista(pacientes);
+    }
+
     return 0;
 }

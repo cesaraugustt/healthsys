@@ -7,12 +7,13 @@ Paciente* criar_paciente(int id, const char* cpf, const char* nome, int idade,
 const char* data_cadastro) {
     Paciente* novo_paciente = (Paciente*)malloc(sizeof(Paciente));
     if (novo_paciente == NULL) {
-        printf("Erro ao alocar memória!\n");
-        exit(1);
+        fprintf(stderr, "Erro ao alocar memória para o paciente!\n");
+        return NULL;
     }
 
+    /* Inicializa os campos do paciente com as informações recebidas. */
     novo_paciente->id = id;
-    strcpy(novo_paciente->cpf,cpf);
+    strcpy(novo_paciente->cpf, cpf);
     strcpy(novo_paciente->nome, nome);
     novo_paciente->idade = idade;
     strcpy(novo_paciente->data_cadastro, data_cadastro);

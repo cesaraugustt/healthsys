@@ -17,6 +17,8 @@ static No* criar_no(Paciente* paciente) {
         return NULL;
     }
 
+    /* Inicializa o novo nó com o paciente informado e todos os ponteiros
+     * nulos. */
     novo_no->paciente = paciente;
     novo_no->anterior = NULL;
     novo_no->proximo = NULL;
@@ -42,14 +44,19 @@ void inserir_paciente(Lista* lista, Paciente* paciente) {
         return;
     }
 
+    // Verifica se a lista esta vazia.
+    // Se sim, o novo paciente sera o primeiro e o ultimo.
     if (lista->ultimo == NULL) {
         lista->primeiro = lista->ultimo = criar_no(paciente);
     } else {
+        // Caso contrario, o novo paciente sera o ultimo.
         No* no = criar_no(paciente);
         if (no == NULL) {
             fprintf(stderr, "Erro ao alocar memória para o nó!\n");
             return;
         }
+
+        // Atualiza os ponteiros do novo nó e do ultimo nó.
         lista->ultimo->proximo = no;
         no->anterior = lista->ultimo;
         lista->ultimo = no;
@@ -75,6 +82,7 @@ void remover_paciente(Lista* lista, int id) {
         return;
     }
 
+    // Atualiza os ponteiros para remover o paciente da lista
     if (anterior == NULL) {
         lista->primeiro = atual->proximo;
     } else {
@@ -87,6 +95,7 @@ void remover_paciente(Lista* lista, int id) {
         atual->proximo->anterior = anterior;
     }
 
+    // Libera a memoria do paciente e do no
     liberar_paciente(atual->paciente);
     free(atual);
     printf("Paciente removido com sucesso.\n");
@@ -104,26 +113,33 @@ void imprimir_lista(Lista* lista) {
         return;
     }
 
+    // Imprime o cabeçalho da tabela
     printf("%-4s %-15s %-30s %-6s %s\n", "ID", "CPF", "Nome", "Idade", "Data Cadastro");
 
+    // Percorre todos os nós da lista
     while (no_atual != NULL) {
         if (no_atual->paciente != NULL) {
             imprimir_paciente(no_atual->paciente);
         } else {
             fprintf(stderr, "Erro: paciente nulo.\n");
         }
+        // Avança para o próximo nó da lista
         no_atual = no_atual->proximo;
     }
 }
 
 void liberar_lista(Lista* lista) {
+    /* Percorre a lista e libera a memória de cada paciente e seu respectivo
+     * nó. */
     No* atual = lista->primeiro;
-    while (atual){
+    while (atual) {
         No* proximo = atual->proximo;
         liberar_paciente(atual->paciente);
         free(atual);
         atual = proximo;
     }
+
+    /* Libera a memória alocada para a lista em si. */
     free(lista);
 }
 
@@ -132,6 +148,7 @@ void buscar_por_nome(Lista* lista, const char* nome) {
     printf("%-4s %-15s %-30s %-6s %s\n", "ID", "CPF", "Nome", "Idade", "Data Cadastro");
     while (atual != NULL) {
         if (strstr(atual->paciente->nome, nome) != NULL) {
+            // Imprime o paciente se o nome contiver a substring 'nome'
             imprimir_paciente(atual->paciente);
         }
         atual = atual->proximo;
@@ -139,11 +156,15 @@ void buscar_por_nome(Lista* lista, const char* nome) {
 }
 
 void buscar_por_cpf(Lista* lista, const char* cpf) {
+    // Inicializa o ponteiro para o primeiro nó da lista
     No* atual = lista->primeiro;
+
+    // Percorre a lista até encontrar o paciente com o CPF especificado
     while (atual != NULL && strcmp(atual->paciente->cpf, cpf) != 0) {
         atual = atual->proximo;
     }
 
+    // Se encontrar o paciente, imprime suas informações
     if (atual != NULL) {
         printf("%-4s %-15s %-30s %-6s %s\n", "ID", "CPF", "Nome", "Idade", "Data Cadastro");
         imprimir_paciente(atual->paciente);
