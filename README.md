@@ -1,6 +1,6 @@
 # Sistema de Gerenciamento de Dados de Pacientes (HealthSys)
 
-Este sistema foi desenvolvido como parte do trabalho prático da disciplina de Programação do IFES - Campus Serra. O HealthSys é um sistema de gerenciamento de dados de pacientes que permite realizar operações básicas de cadastro, consulta, atualização e remoção de registros.
+Este sistema foi desenvolvido como parte do trabalho prático da disciplina de Estruturas de Dados do IFES - Campus Serra. O HealthSys é um sistema de gerenciamento de dados de pacientes que permite realizar operações básicas de cadastro, consulta, atualização e remoção de registros.
 
 ## Funcionalidades
 
@@ -74,7 +74,7 @@ Implementa uma lista duplamente encadeada para armazenar os pacientes, permitind
 
 1. Clone o repositório:
 ```bash
-git clone https://github.com/seu-usuario/healthsys.git
+git clone https://github.com/cesaraugustt/healthsys.git
 cd healthsys
 ```
 
@@ -103,8 +103,8 @@ make clean
 
 ## Autor
 
-[Seu Nome]
-[Seu Email]
+César Augusto
+cesaraugustobispo@gmail.com
 
 ## Licença
 
