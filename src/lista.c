@@ -18,8 +18,7 @@ static No* criar_no(Paciente* paciente) {
         return NULL;
     }
 
-    /* Inicializa o novo nó com o paciente informado e todos os ponteiros
-     * nulos. */
+    // Inicializa o novo nó com o paciente informado e todos os ponteiros nulos.
     novo_no->paciente = paciente;
     novo_no->anterior = NULL;
     novo_no->proximo = NULL;
@@ -174,8 +173,7 @@ void imprimir_lista(Lista* lista) {
 }
 
 void liberar_lista(Lista* lista) {
-    /* Percorre a lista e libera a memória de cada paciente e seu respectivo
-     * nó. */
+    // Percorre a lista e libera a memória de cada paciente e seu respectivo nó.
     No* atual = lista->primeiro;
     while (atual) {
         No* proximo = atual->proximo;
@@ -184,7 +182,7 @@ void liberar_lista(Lista* lista) {
         atual = proximo;
     }
 
-    /* Libera a memória alocada para a lista em si. */
+    // Libera a memória alocada para a lista em si.
     free(lista);
 }
 
