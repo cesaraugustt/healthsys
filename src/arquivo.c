@@ -23,10 +23,9 @@ Lista* carregar_bd() {
 
     // Ignora o cabeçalho do arquivo CSV
     if (fgets(linha, sizeof(linha), file) == NULL) {
-        fprintf(stderr, "Erro ao ler o cabeçalho do arquivo\n");
+        printf("Aviso: O arquivo está vazio ou contém apenas o cabeçalho.\n");
         fclose(file);
-        liberar_lista(lista);
-        return NULL; // Retorna NULL se houver erro ao ler o cabeçalho
+        return lista; // Retorna a lista vazia corretamente
     }
     
     // Lê cada linha do arquivo CSV
@@ -36,7 +35,7 @@ Lista* carregar_bd() {
 
         // Extrai os campos da linha lida
         if (sscanf(linha, "%d,%14[^,],%99[^,],%d,%10[^,]", &id, cpf, nome, &idade, data_cadastro) != 5) {
-            printf("Erro ao ler linha do arquivo csv: %s\n", linha);
+            fprintf(stderr, "Erro ao ler linha do arquivo csv: %s\n", linha);
             continue; // Continua para a próxima linha em caso de erro de leitura
         }
 
@@ -70,15 +69,12 @@ void salvar_bd(Lista* lista) {
     No* atual = lista->primeiro;
     while (atual != NULL) {
         Paciente* p = atual->paciente;
-        fprintf(
-            file,
-            "%d,%s,%s,%d,%s\n",
-            p->id,
-            p->cpf,
-            p->nome,
-            p->idade,
-            p->data_cadastro
-        );
+        if (atual->proximo == NULL) {
+            // Se for o último registro, não inclui o caractere de nova linha
+            fprintf(file, "%d,%s,%s,%d,%s", p->id, p->cpf, p->nome, p->idade, p->data_cadastro);
+        } else {
+            fprintf(file, "%d,%s,%s,%d,%s\n", p->id, p->cpf, p->nome, p->idade, p->data_cadastro);
+        }
         atual = atual->proximo;
     }
 

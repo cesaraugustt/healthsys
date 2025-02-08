@@ -3,6 +3,8 @@
 
 #include "paciente.h"
 
+#define REGISTROS_POR_PAGINA 5
+
 typedef struct No {
     Paciente* paciente;
     struct No* anterior;
@@ -16,8 +18,8 @@ typedef struct lista {
 
 Lista* criar_lista();
 void inserir_paciente(Lista* lista, Paciente* paciente);
-void buscar_por_nome(Lista* lista, const char* nome);
-void buscar_por_cpf(Lista* lista, const char* cpf);
+int buscar_por_nome(Lista* lista, const char* nome);
+int buscar_por_cpf(Lista* lista, const char* cpf);
 void remover_paciente(Lista* lista, int id);
 void imprimir_lista(Lista* lista);
 void liberar_lista(Lista* lista);

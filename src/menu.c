@@ -5,11 +5,9 @@
 #include "validacao.h"
 
 /**
- * Limpa o buffer de entrada até encontrar um caractere de quebra de linha
- * (\n) ou o final do arquivo (EOF).
+ * Limpa o buffer de entrada até encontrar um caractere de quebra de linha (\n) ou o final do arquivo (EOF).
  *
- * Essa função é necessária pois as funções de leitura como scanf() e fgets()
- * podem deixar caracteres no buffer de entrada.
+ * Essa função é necessária pois as funções de leitura como scanf() e fgets() podem deixar caracteres no buffer de entrada.
  */
 void limpar_buffer() {
     int c;
@@ -27,7 +25,12 @@ void exibir_menu() {
     printf("Escolha uma opção: ");
 }
 
-void consultar_paciente(Lista* lista) {
+int consultar_paciente(Lista* lista) {
+    if (lista == NULL) {
+        fprintf(stderr, "Erro: lista nula!\n");
+        return 0;
+    }
+
     printf("\nEscolha o modo de consulta:\n");
     printf("1 - Por nome\n");
     printf("2 - Por CPF\n");
@@ -37,7 +40,7 @@ void consultar_paciente(Lista* lista) {
     char opcao;
     if (scanf(" %c", &opcao) != 1) {
         printf("Erro ao ler a opção!\n");
-        return;
+        return 0;
     }
     limpar_buffer();  // Limpa o buffer de entrada
 
@@ -48,25 +51,24 @@ void consultar_paciente(Lista* lista) {
             // Lê uma string com espaços até a quebra de linha
             if (scanf(" %[^\n]", nome) != 1) {
                 printf("Erro ao ler o nome!\n");
-                return;
+                return 0;
             }
             limpar_buffer();
-            buscar_por_nome(lista, nome);
-            break;
+            return buscar_por_nome(lista, nome);
         }
         case '2': {
             char cpf[15];
             printf("Digite o CPF (apenas números): ");
             if (scanf("%14s", cpf) != 1) {  // Limita a 14 caracteres para segurança
                 printf("Erro ao ler o CPF!\n");
-                return;
+                return 0;
             }
             limpar_buffer();
 
-            // Validação do CPF utilizando a função validar_cpf
+            // Validação do CPF
             if (!validar_cpf(cpf)) {
                 printf("CPF inválido!\n");
-                return;
+                return 0;
             }
 
             // Formata o CPF para o padrão "XXX.XXX.XXX-XX"
@@ -74,21 +76,21 @@ void consultar_paciente(Lista* lista) {
             formatar_cpf(cpf, cpf_formatado);
 
             // Realiza a busca utilizando o CPF formatado
-            buscar_por_cpf(lista, cpf_formatado);
-            break;
+            return buscar_por_cpf(lista, cpf_formatado);
         }
         case '3':
             // Retorna ao menu principal sem realizar consulta
-            return;
+            return 0;
         default:
             printf("Opção inválida!\n");
-            return;
+            return 0;
     }
+    return 0;
 }
 
 static int maior_id(Lista* lista) {
     int id = 1;  // Valor padrão para lista vazia
-    if (lista != NULL) {
+    if (lista != NULL && lista->ultimo != NULL) {
         id = lista->ultimo->paciente->id + 1;  // Incrementa o maior ID encontrado
     }
     return id;
@@ -109,7 +111,7 @@ void cadastrar_paciente(Lista* lista) {
         
         // Verifica se o CPF é válido
         if (!validar_cpf(cpf_numeros)) {
-            printf("CPF inválido! Digite exatamente 11 números.\n");
+            printf("CPF inválido!\n");
             continue;
         }
         
@@ -174,122 +176,138 @@ void cadastrar_paciente(Lista* lista) {
 
 void remover_paciente_menu(Lista* lista) {
     printf("\n=== Remover Paciente ===\n");
-    // Mostra a lista de pacientes
-    consultar_paciente(lista);
+    if (!consultar_paciente(lista)) return;
 
     int id;
     printf("Digite o ID do paciente a ser removido: ");
-    scanf("%d", &id);
+    if (scanf("%d", &id) != 1) {
+        printf("ID inválido!\n");
+        limpar_buffer();
+        return;
+    }
     limpar_buffer();
 
     char confirmacao;
     printf("Tem certeza? (S/N): ");
-    scanf(" %c", &confirmacao);
-    // limpar_buffer();
-
-    // Confirma se o usuário tem certeza da operação
-    if (confirmacao == 'S' || confirmacao == 's') {
-        // Remove o paciente da lista
-        remover_paciente(lista, id);
-    } else {
+    if (scanf(" %c", &confirmacao) != 1 || (confirmacao != 'S' && confirmacao != 's')) {
         printf("Operação cancelada.\n");
+        return;
     }
+    limpar_buffer();
+
+    remover_paciente(lista, id);
 }
 
 void atualizar_paciente_menu(Lista* lista) {
     printf("\n=== Atualizar Paciente ===\n");
-    consultar_paciente(lista);
+    if (!consultar_paciente(lista)) return;
 
     int id;
     printf("Digite o ID do paciente a ser atualizado: ");
-    scanf("%d", &id);
+    if (scanf("%d", &id) != 1) {
+        printf("Erro na leitura do ID. Tente novamente.\n");
+        limpar_buffer();
+        return;
+    }
     limpar_buffer();
 
-    // Busca o paciente pelo ID na lista
+    // Busca o paciente a ser atualizado na lista
     No* atual = lista->primeiro;
-    Paciente* paciente = NULL;
-    while (atual != NULL) {
-        if (atual->paciente->id == id) {
-            paciente = atual->paciente;
-            break;
-        }
+    while (atual && atual->paciente->id != id) {
         atual = atual->proximo;
     }
 
-    if (paciente == NULL) {
+    if (!atual) {
         printf("ID inválido!\n");
         return;
     }
 
-    char novo_cpf[15];
-    char novo_nome[100];
-    char nova_data[11];
-    char idade_str[100];
+    Paciente* paciente = atual->paciente;
+    if (!paciente) {
+        printf("Erro: paciente nulo!\n");
+        return;
+    }
+
+    char input[100];
+    char novo_cpf[15], novo_nome[100], nova_data[11];
     int nova_idade;
 
-    // Lê os novos dados informados pelo usuário
+    // Lê o novo CPF (ou mantém o atual se o usuário digitar '-')
     printf("Novo CPF (apenas números, atual: %s | '-' para manter): ", paciente->cpf);
-    scanf(" %14s", novo_cpf);
+    if (scanf(" %14s", input) != 1) {
+        printf("Erro na leitura do CPF. Tente novamente.\n");
+        limpar_buffer();
+        return;
+    }
     limpar_buffer();
-
-    printf("Novo nome (atual: %s | '-' para manter): ", paciente->nome);
-    scanf(" %99[^\n]", novo_nome);
-    limpar_buffer();
-
-    printf("Nova idade (atual: %d | '-' para manter): ", paciente->idade);
-    scanf(" %99s", idade_str);
-    limpar_buffer();
-
-    printf("Nova data (formato AAAAMMDD, atual: %s | '-' para manter): ", paciente->data_cadastro);
-    scanf(" %10s", nova_data);
-    limpar_buffer();
-
-    // Validação do CPF (somente se for alterado)
-    if (strcmp(novo_cpf, "-") != 0) {
-        if (!validar_cpf(novo_cpf)) {
+    if (strcmp(input, "-") != 0) {
+        // Verifica se o CPF é válido antes de formatar
+        if (!validar_cpf(input)) {
             printf("CPF inválido!\n");
             return;
         }
-        // Opcional: formata o CPF para exibição (por exemplo, 12345678909 -> 123.456.789-09)
-        char cpf_formatado[15];
-        formatar_cpf(novo_cpf, cpf_formatado);
-        strcpy(novo_cpf, cpf_formatado);
+        // Formata o CPF para o padrão "XXX.XXX.XXX-XX"
+        formatar_cpf(input, novo_cpf);
     } else {
         strcpy(novo_cpf, paciente->cpf);
     }
 
-    // Validação do nome (se for mantido, utiliza o atual)
-    if (strcmp(novo_nome, "-") == 0) {
+    // Lê o novo nome (ou mantém o atual se o usuário digitar '-')
+    printf("Novo nome (atual: %s | '-' para manter): ", paciente->nome);
+    if (scanf(" %99[^\n]", input) != 1) {
+        printf("Erro na leitura do nome. Tente novamente.\n");
+        limpar_buffer();
+        return;
+    }
+    limpar_buffer();
+    if (strcmp(input, "-")) {
+        strcpy(novo_nome, input);
+    } else {
         strcpy(novo_nome, paciente->nome);
     }
 
-    // Validação da idade
-    if (strcmp(idade_str, "-") == 0) {
-        nova_idade = paciente->idade;
-    } else {
-        nova_idade = atoi(idade_str);
-        if (!validar_idade(nova_idade)) {
-            printf("Idade inválida! A idade deve estar entre 0 e 150.\n");
+    // Lê a nova idade (ou mantém a atual se o usuário digitar '-')
+    printf("Nova idade (atual: %d | '-' para manter): ", paciente->idade);
+    if (scanf(" %99s", input) != 1) {
+        printf("Erro na leitura da idade. Tente novamente.\n");
+        limpar_buffer();
+        return;
+    }
+    limpar_buffer();
+    if (strcmp(input, "-")) {
+        int idade_temp = atoi(input);
+        if (validar_idade(idade_temp)) {
+            nova_idade = idade_temp;
+        } else {
+            printf("Idade inválida!\n");
             return;
         }
+    } else {
+        nova_idade = paciente->idade;
     }
 
-    // Validação da data
-    if (strcmp(nova_data, "-") != 0) {
-        if (!validar_data(nova_data)) {
-            printf("Data inválida! Verifique se o formato (AAAAMMDD) e os valores estão corretos.\n");
-            return;
-        }
+    // Lê a nova data (ou mantém a atual se o usuário digitar '-')
+    printf("Nova data (formato AAAAMMDD, atual: %s | '-' para manter): ", paciente->data_cadastro);
+    if (scanf(" %10s", input) != 1) {
+        printf("Erro na leitura da data. Tente novamente.\n");
+        limpar_buffer();
+        return;
+    }
+    limpar_buffer();
+    if (strcmp(input, "-") && validar_data(input)) {
+        sprintf(nova_data, "%.4s-%.2s-%.2s", input, input + 4, input + 6);
     } else {
         strcpy(nova_data, paciente->data_cadastro);
     }
 
-    // Atualiza o paciente com os novos dados validados
+    // Atualiza os dados do paciente
     atualizar_paciente(paciente, novo_cpf, novo_nome, nova_idade, nova_data);
 }
 
 void menu(Lista* lista) {
     char opcao;
+
+    // Verifica se a lista foi inicializada corretamente
     if (lista == NULL) {
         printf("Erro: lista não inicializada!\n");
         return;
@@ -297,46 +315,44 @@ void menu(Lista* lista) {
 
     do {
         exibir_menu();
-        
-        // Lê apenas o primeiro caractere
+
+        // Lê a opção escolhida pelo usuário (apenas o primeiro caractere)
         if (scanf(" %c", &opcao) != 1) {
             printf("Erro na leitura da opção. Tente novamente.\n");
             limpar_buffer();
-            continue;
+            continue;  // Retorna ao início do loop
         }
-        limpar_buffer();
+        limpar_buffer();  // Limpa o buffer de entrada
 
+        // Executa a ação correspondente à opção escolhida
         switch (opcao) {
             case '1':
-                consultar_paciente(lista);
+                consultar_paciente(lista);  // Consulta um paciente
                 break;
             case '2':
-                atualizar_paciente_menu(lista);
+                atualizar_paciente_menu(lista);  // Atualiza os dados de um paciente
                 break;
             case '3':
-                remover_paciente_menu(lista);
+                remover_paciente_menu(lista);  // Remove um paciente da lista
                 break;
             case '4':
-                cadastrar_paciente(lista);
+                cadastrar_paciente(lista);  // Cadastra um novo paciente
                 break;
             case '5':
+                // Verifica se a lista de pacientes está vazia
                 if (lista->primeiro == NULL) {
                     printf("\nLista de pacientes está vazia.\n");
                 } else {
-                    imprimir_lista(lista);
+                    imprimir_lista(lista);  // Imprime a lista de pacientes
                 }
                 break;
             case 'Q':
             case 'q':
                 printf("Salvando dados e encerrando...\n");
-                salvar_bd(lista);
-                return;
+                salvar_bd(lista);  // Salva os dados no banco de dados
+                return;  // Encerra a função
             default:
                 printf("Opção inválida! Por favor, escolha uma opção do menu.\n");
         }
-        
-        printf("\nPressione ENTER para continuar...");
-        getchar();
-        
-    } while (opcao != 'Q' && opcao != 'q');
+    } while (opcao != 'Q' && opcao != 'q');  // Continua até que o usuário escolha sair
 }

@@ -3,18 +3,17 @@
 #include <string.h>
 #include "menu.h"
 
-int main() {
-    Lista* pacientes = carregar_bd();
-    if (pacientes == NULL) {
+int main(void) {
+    Lista *lista_de_pacientes = carregar_bd();
+    if (lista_de_pacientes == NULL) {
         fprintf(stderr, "Erro ao carregar lista de pacientes.\n");
-        return 1;
+        return EXIT_FAILURE;
     }
 
-    menu(pacientes);
+    menu(lista_de_pacientes);
 
-    if (pacientes != NULL) {
-        liberar_lista(pacientes);
+    if (lista_de_pacientes != NULL) {
+        liberar_lista(lista_de_pacientes);
     }
-
-    return 0;
+    return EXIT_SUCCESS;
 }
