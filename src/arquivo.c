@@ -25,7 +25,7 @@ Lista* carregar_bd() {
     if (fgets(linha, sizeof(linha), file) == NULL) {
         printf("Aviso: O arquivo está vazio ou contém apenas o cabeçalho.\n");
         fclose(file);
-        return lista; // Retorna a lista vazia corretamente
+        return lista; // Retorna a lista vazia
     }
     
     // Lê cada linha do arquivo CSV
