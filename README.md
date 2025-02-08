@@ -13,7 +13,6 @@ Este sistema foi desenvolvido como parte do trabalho prático da disciplina de E
 ## Estrutura do Projeto
 
 ```
-.
 ├── src/
 │   ├── main.c          # Programa principal
 │   ├── menu.c          # Interface com usuário
@@ -51,26 +50,35 @@ Implementa uma lista duplamente encadeada para armazenar os pacientes, permitind
 
 ## Decisões de Implementação
 
-1. **Estrutura de Dados**: Optamos por uma lista duplamente encadeada para facilitar a navegação nos dois sentidos durante a paginação.
+1. **Estrutura de Dados**: 
+   - Lista duplamente encadeada para facilitar a navegação nos dois sentidos durante a paginação
 
-2. **Persistência**: Os dados são armazenados em arquivo CSV, carregados na inicialização e salvos ao finalizar o programa.
+2. **Persistência**: 
+   - Dados armazenados em arquivo CSV
+   - Carregamento na inicialização
+   - Salvamento automático ao finalizar
 
 3. **Busca**: 
-   - Implementamos busca case-insensitive por nome
+   - Case-insensitive por nome
    - Busca parcial que encontra substrings no nome
    - Busca exata por CPF
 
-4. **Interface**:
+4. **Interface**: 
    - Menu interativo em loop
    - Listagem paginada (5 registros por página)
    - Confirmação antes de operações críticas
 
-5. **Validações**:
+5. **Validações**: 
    - CPF (formato e dígitos verificadores)
    - Data (formato YYYY-MM-DD)
    - Idade (0-150 anos)
 
-## Como Compilar e Executar
+## Dependências
+
+- GCC 11+
+- Make
+
+## Como Instalar
 
 1. Clone o repositório:
 ```bash
@@ -85,18 +93,22 @@ make
 
 3. Execute o programa:
 ```bash
-./healthsys
-```
-Ou
-```bash
 make run
 ```
 
-## Requisitos
+## Exemplos de Uso
 
-- GCC 11 ou superior
-- Make
-- Sistema operacional Linux (testado no Ubuntu 22.04)
+### Cadastro de Paciente
+1. Selecione opção 4 no menu principal
+2. Digite o CPF (somente números): 12345678909
+3. Digite o nome: João da Silva
+4. Digite a idade: 45
+5. Digite a data: 20240208
+
+### Consulta de Paciente
+1. Selecione opção 1 no menu principal
+2. Escolha o modo de busca (1 - Nome, 2 - CPF)
+3. Digite o termo de busca
 
 ## Limpeza
 
@@ -107,7 +119,7 @@ make clean
 
 ## Autor
 
-César Augusto
+César Augusto  
 cesaraugustobispo@gmail.com
 
 ## Licença
