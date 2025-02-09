@@ -176,8 +176,11 @@ void cadastrar_paciente(Lista* lista) {
 
 void remover_paciente_menu(Lista* lista) {
     printf("\n=== Remover Paciente ===\n");
+    
+    // Consulta se o paciente com o ID fornecido existe
     if (!consultar_paciente(lista)) return;
 
+    // Lê o ID do paciente a ser removido
     int id;
     printf("Digite o ID do paciente a ser removido: ");
     if (scanf("%d", &id) != 1) {
@@ -189,6 +192,8 @@ void remover_paciente_menu(Lista* lista) {
 
     char confirmacao;
     printf("Tem certeza? (S/N): ");
+
+    // Confirma com o usuário antes de remover o paciente
     if (scanf(" %c", &confirmacao) != 1 || (confirmacao != 'S' && confirmacao != 's')) {
         printf("Operação cancelada.\n");
         return;
